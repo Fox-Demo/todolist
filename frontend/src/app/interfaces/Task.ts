@@ -1,10 +1,10 @@
-export type Task = {
-  id: number;
+export interface Task {
+  id: string;
   name: string;
   status: boolean;
-};
+}
 
-export type TasksRes = {
+export interface TasksRes {
   success: boolean;
   data: Task[];
-};
+}

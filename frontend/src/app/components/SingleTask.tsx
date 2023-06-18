@@ -1,42 +1,48 @@
-import React, { useState } from "react";
 import { Task } from "../interfaces/Task";
-import { HOST } from "../utils/constants";
-import axios from "axios";
 import { AiFillCheckCircle, AiFillDelete } from "react-icons/ai";
 
-const SingleTask: React.FC<Task> = ({ id, name, status: taskStatus }) => {
-  const [status, setStatus] = useState(taskStatus);
+interface SingleTaskProps {
+  task: Task;
+  updateModal: (status: boolean, content: string) => void;
+  updateTask: (id: string, status: boolean) => Promise<boolean>;
+  deleteTask: (id: string) => Promise<boolean>;
+}
 
-  const updateTaskStatus = async (_status: boolean) => {
-    await axios.put(`${HOST}/tasks/${id}`, {
-      status: _status,
-    });
-    setStatus(_status); // Refresh the web page
+const SingleTask: React.FC<SingleTaskProps> = ({
+  task,
+  updateModal,
+  updateTask,
+  deleteTask,
+}) => {
+  const updateTaskAndSetModal = async () => {
+    const isSuccess = await updateTask(task.id, !task.status);
+    let content = task.status ? "Back" : "Complete";
+    updateModal(isSuccess, content);
   };
 
-  const deleteTask = async () => {
-    // No rerendering
-    await axios.delete(`${HOST}/tasks/${id}`);
+  const deleteTaskAndSetModal = async () => {
+    const isSuccess = await deleteTask(task.id);
+    updateModal(isSuccess, "Delete");
   };
 
   return (
     <>
       <div className="flex justify-between items-center w-full px-14 py-2 text-3xl mb-2">
-        <p>{name}</p>
+        <p>{task.name}</p>
         <div className="flex gap-2">
-          {status ? (
+          {task.status ? (
             <AiFillCheckCircle
-              onClick={() => updateTaskStatus(false)}
+              onClick={() => updateTaskAndSetModal()}
               className="cursor-pointer text-green-400 hover:text-green-100 duration-300"
             />
           ) : (
             <AiFillCheckCircle
-              onClick={() => updateTaskStatus(true)}
+              onClick={() => updateTaskAndSetModal()}
               className="cursor-pointer text-gray-400 hover:text-gray-100 duration-300"
             />
           )}
           <AiFillDelete
-            onClick={() => deleteTask()}
+            onClick={() => deleteTaskAndSetModal()}
             className="cursor-pointer text-red-400 hover:text-red-100 duration-300"
           />
         </div>
